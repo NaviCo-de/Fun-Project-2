@@ -1,9 +1,6 @@
 import streamlit as st
 import requests
-import torchaudio
-import tempfile
 from transformers import pipeline
-from io import BytesIO
 
 def calculate_user_prompt(chat_history=[]):
     count = 0
@@ -13,18 +10,8 @@ def calculate_user_prompt(chat_history=[]):
     return count
 
 def transcript_audio(audio):
-    # Save the file temporarily so torchaudio can read it
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-        tmp.write(audio.read())
-        tmp_path = tmp.name
-
-    # Load waveform
-    waveform, sample_rate = torchaudio.load(tmp_path)
-
-    # Run the whisper pipeline (force to CPU)
-    pipe = pipeline("automatic-speech-recognition", model="openai/whisper-base", device=-1)
-    result = pipe(waveform.numpy(), sampling_rate=sample_rate)
-
+    pipe = pipeline("automatic-speech-recognition", model="openai/whisper-base")
+    result = pipe(audio)
     return result['text']
 
 
